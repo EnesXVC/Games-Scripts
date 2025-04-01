@@ -1,0 +1,182 @@
+local maxDistance = 250
+local localPlayer = game.Players.LocalPlayer
+local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+local root = character:WaitForChild("HumanoidRootPart")
+local runService = game:GetService("RunService")
+local workspace = game.Workspace
+
+local espTable = {}
+
+local entityMapping = {
+    ["Rush"] = "Rush",
+    ["Ambush"] = "Ambush",
+    ["Figure"] = "Figure",
+    ["Seek"] = "Seek",
+    ["Halt"] = "Halt",
+    ["Eyes"] = "Eyes",
+    ["Screech"] = "Screech",
+    ["Dupe"] = "Dupe",
+    ["Glitch"] = "Glitch",
+    ["Jack"] = "Jack",
+    ["Hide"] = "Hide",
+    ["Timothy"] = "Timothy",
+    ["Window"] = "Window",
+    ["Shadow"] = "Shadow",
+    ["El Goblino"] = "El Goblino",
+    ["Jeff"] = "Jeff",
+    ["Bob"] = "Bob",
+    ["Void"] = "Void",
+    ["Snare"] = "Snare"
+}
+
+local function getDisplayName(objName)
+    if entityMapping[objName] then
+        return entityMapping[objName]
+    elseif objName:match("Door") then
+        return "Door"
+    elseif objName:match("Item") then
+        return "Item"
+    elseif objName:match("Key") then
+        return "Key"
+    end
+    return objName
+end
+
+local function createESP(object, objPos, displayName)
+    if espTable[object] then return end  
+    local playerPos = root.Position
+    local distance = (playerPos - objPos).Magnitude
+    local transparency = math.clamp(1 - (distance / maxDistance), 0.1, 1) 
+
+    local targetPart = nil
+    if object:IsA("Model") and object.PrimaryPart then
+        targetPart = object.PrimaryPart
+    elseif object:IsA("Part") then
+        targetPart = object
+    else
+        return
+    end
+
+    -- Daha küçük beam boyutları
+    local beam = Instance.new("Beam")
+    beam.Name = "ESP_Beam"
+    beam.Attachment0 = Instance.new("Attachment", root)
+    beam.Attachment1 = Instance.new("Attachment", targetPart)
+    beam.FaceCamera = true
+    beam.Width0 = 0.03  -- Daha ince beam
+    beam.Width1 = 0.03  -- Daha ince beam
+    beam.Transparency = NumberSequence.new(1 - transparency)
+    beam.Color = ColorSequence.new(Color3.new(0.8, 0.8, 0.8))  -- Daha açık renk
+    beam.Parent = workspace
+
+    -- Daha küçük billboard
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "ESP_Label"
+    billboard.Size = UDim2.new(0, 150, 0, 30)  -- Daha küçük boyut
+    billboard.StudsOffset = Vector3.new(0, 2, 0)  -- Daha az yükseklik
+    billboard.AlwaysOnTop = true
+
+    local textLabel = Instance.new("TextLabel", billboard)
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextColor3 = Color3.new(1, 1, 1)
+    textLabel.TextTransparency = 1 - transparency  
+    textLabel.TextScaled = true
+    textLabel.Font = Enum.Font.SourceSansBold  -- Daha okunaklı font
+    textLabel.TextSize = 14  -- Daha küçük yazı boyutu
+    textLabel.Text = displayName
+
+    billboard.Adornee = targetPart
+    billboard.Parent = workspace
+
+    -- Daha ince highlight
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "ESP_Highlight"
+    highlight.FillColor = Color3.new(0.2, 0.2, 0.2)
+    highlight.FillTransparency = 0.85  -- Daha şeffaf
+    highlight.OutlineColor = Color3.new(1, 1, 1)
+    highlight.OutlineTransparency = 0
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    highlight.Adornee = object:IsA("Model") and object or object
+    highlight.Parent = workspace
+
+    espTable[object] = {
+        beam = beam,
+        billboard = billboard,
+        textLabel = textLabel,
+        highlight = highlight,
+    }
+end
+
+local function removeESP(object)
+    if espTable[object] then
+        for _, v in pairs(espTable[object]) do
+            if v then v:Destroy() end
+        end
+        espTable[object] = nil
+    end
+end
+
+local function processObject(obj)
+    if espTable[obj] then return end
+    if not (obj:IsA("Model") or obj:IsA("Part")) then return end
+    if obj:IsA("Model") and game.Players:GetPlayerFromCharacter(obj) then return end
+
+    local objName = obj.Name
+    local displayName = getDisplayName(objName)
+
+    if objName:match("Door") or objName:match("Item") or objName:match("Key")
+       or entityMapping[objName] or objName:match("Entity") or objName:match("Figure") then
+
+        local objPos
+        if obj:IsA("Model") and obj.PrimaryPart then
+            objPos = obj.PrimaryPart.Position
+        elseif obj:IsA("Part") then
+            objPos = obj.Position
+        end
+
+        if objPos and ((root.Position - objPos).Magnitude <= maxDistance) then
+            createESP(obj, objPos, displayName)
+        end
+    end
+end
+
+-- Optimize edilmiş tarama
+for _, obj in ipairs(workspace:GetDescendants()) do
+    task.spawn(processObject, obj)
+end
+
+workspace.DescendantAdded:Connect(function(obj)
+    task.spawn(processObject, obj)
+end)
+
+workspace.DescendantRemoving:Connect(function(obj)
+    removeESP(obj)
+end)
+
+local function updateESP()
+    local playerPos = root.Position
+    for object, esp in pairs(espTable) do
+        if object and object.Parent then
+            local targetPart = object:IsA("Model") and object.PrimaryPart or object
+            if targetPart then
+                local distance = (playerPos - targetPart.Position).Magnitude
+                local transparency = math.clamp(1 - (distance / maxDistance), 0.1, 1)
+                
+                if esp.beam then
+                    esp.beam.Transparency = NumberSequence.new(1 - transparency)
+                end
+                if esp.textLabel then
+                    esp.textLabel.TextTransparency = 1 - transparency
+                end
+                if esp.highlight then
+                    esp.highlight.FillTransparency = 0.85 - ((transparency - 0.1) * 0.65)
+                end
+            end
+        else
+            removeESP(object)
+        end
+    end
+end
+
+runService.Heartbeat:Connect(updateESP)
