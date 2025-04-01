@@ -1,0 +1,11 @@
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local vipTools = replicatedStorage:FindFirstChild("VipTools")
+
+if vipTools then
+    for _, tool in ipairs(vipTools:GetChildren()) do
+        local c = {
+            [1] = tool.Name
+        }
+        replicatedStorage.RemoteEventsFolder.BackPackToolSend:FireServer(unpack(c))
+    end
+end
