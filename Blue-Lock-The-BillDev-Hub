@@ -585,7 +585,7 @@ local tracer = nil
 local distanceText = nil
 local highlight = nil
 
-local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/main/source.lua", true))()
+local Luna = loadstring(game:HttpGet("https://pastebin.com/raw/Y8wBJLVt", true))()
 
 local getgenv = getgenv
 getgenv().Multiplier = 0.5
