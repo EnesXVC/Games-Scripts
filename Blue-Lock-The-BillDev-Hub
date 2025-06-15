@@ -2402,3 +2402,4 @@ game:GetService("RunService").Heartbeat:Connect(function()
         autoFarm()
     end
 end)
+]]
