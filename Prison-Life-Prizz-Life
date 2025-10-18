@@ -5457,11 +5457,11 @@ local OnCommand = function(text)
 	elseif cm("neutral") or cm("neutrals") or cm("ne") then
 		TeamEve("Medium stone grey")
 		Notif("OK", "Changed team to neutral.")
-	elseif cm("anticrash") or cm("antispike") or cm("ac") then
+--[[	elseif cm("anticrash") or cm("antispike") or cm("ac") then
 		LocalPlayer.PlayerScripts.ClientGunReplicator.Disabled = not LocalPlayer.PlayerScripts.ClientGunReplicator.Disabled
 		if Args[2] == "true" or Args[2] == "on" then
 			LocalPlayer.PlayerScripts.ClientGunReplicator.Disabled = true
-		elseif Args[2] == "false" or Args[2] == "off" then
+	elseif Args[2] == "false" or Args[2] == "off" then
 			LocalPlayer.PlayerScripts.ClientGunReplicator.Disabled = false
 		end;if LocalPlayer.PlayerScripts.ClientGunReplicator.Disabled then
 			Notif("OK", "Toggled anti-crash to true.")
@@ -5490,7 +5490,7 @@ local OnCommand = function(text)
 					v:Enable()
 				end
 			end
-		end
+		end]]
 	elseif cm("laggygun") or cm("laggun") then
 		LAction("unequip")
 		Toggles.AutoInfiniteAmmo = false
@@ -9571,7 +9571,7 @@ end); if not ea and not LocPL.WrongGame then
 	Notif("Your executor might be too shitty!", "Some commands may be downgraded or NOT work.", 8); LocPL.ShittyExecutor = true
 end
 
---Client Handler
+--[[Client Handler
 coroutine.wrap(function()
 	if LocPL.WrongGame then
 		return
@@ -9615,7 +9615,7 @@ coroutine.wrap(function()
 	end)
 	Connections.OnReplicated = Rstorage:WaitForChild("ReplicateEvent", 3).OnClientEvent:Connect(OnReplication)
 end)()
-
+]]
 Connections.LocalPlayerMouse = LocalPlayer:GetMouse().Button1Down:Connect(function()
 	local Wifi = LocalPlayer:GetMouse().Target
 	if Wifi and Wifi:IsA("BasePart") and Players:FindFirstChild(Wifi.Parent.Name) then
@@ -10149,7 +10149,7 @@ task.spawn(function()
 	end
 
 	Saved.PLINIT = Instance.new("ScreenGui");Saved.PLINIT.Name = "PLADMIN_INITIALS";Saved.PLINIT.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui");Saved.PLINIT.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	local data1, data2 = loadstring(game:HttpGet('https://raw.githubusercontent.com/Chaosscripter/PrizzLife/main/Init/PL_TEAM_GUI'))()
+	--[[local data1, data2 = loadstring(game:HttpGet('https://raw.githubusercontent.com/Chaosscripter/PrizzLife/main/Init/PL_TEAM_GUI'))()
 	local TEAMs = data2; Saved.TeamFrame = data1
 	TEAMs.InmateButton.MouseButton1Click:Connect(function()
 		SavedPositions.AutoRe = nil; workspace.Remote.TeamEvent:FireServer("Bright orange")
@@ -10170,7 +10170,7 @@ task.spawn(function()
 			Threads.HideTeamGui()
 		else Saved.TeamFrame.Visible = false; end
 	end);data1.Visible = LocalPlayer.TeamColor.Name == "Medium stone grey"
-
+]]
 	local ActionFrame = Instance.new("Frame")
 	local PunchButton = Instance.new("ImageButton")
 	local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
@@ -10277,7 +10277,7 @@ UnloadScript = function()
 		States.Invisible = nil; Tasks.Refresh()
 	end; Loops = {}; Powers = {}; States = {}; Toggles = {}; Settings = {User = {}, Ranked = {}}; SavedArgs = {}; RankedPlrs = {};
 	Saved.TeamFrame:Destroy(); PLAdmin:Destroy(); Saved.PLINIT:Destroy(); Saved = {Thread = {}}; LocPL = {};
-	game.Players.LocalPlayer.PlayerScripts.ClientGunReplicator.Disabled = false; workspace:FindFirstChild("PLADMIN LOADED SUCCESS"):Destroy()
+	workspace:FindFirstChild("PLADMIN LOADED SUCCESS"):Destroy()
 end
 --Check gamepass
 LocPL.Gamepass = game:GetService("MarketplaceService"):UserOwnsGamePassAsync(LocalPlayer.UserId, 96651) or game:GetService("MarketplaceService"):UserOwnsGamePassAsync(LocalPlayer.UserId, 643697197)
